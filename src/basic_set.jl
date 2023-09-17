@@ -1,68 +1,51 @@
 
-# EuclideanPoint with x and y coordinates
-struct EuclideanPoint
-    x::Float64
-    y::Float64
+import Base: convert
 
-    function EuclideanPoint(x::Float64, y::Float64)
-        new(x, y)
+abstract type AbstractPoint end
+
+mutable struct EuclideanPoint <: AbstractPoint
+    cords::NTuple
+
+    function EuclideanPoint(cords::NTuple)
+        new(cords)
     end
-
-    function EuclideanPoint(x::Int, y::Int)
-        new(x, y)
-    end
-
 end
 
-# HomogeneousPoint with x, y, z
-# include ideal points and ideal points are not representable in euclidean point
-struct HomogeneousPoint
-    x::Float64
-    y::Float64
-    z::Float64
+mutable struct HomogeneousPoint <: AbstractPoint
+    cords::NTuple
 
-    function HomogeneousPoint(x::Float64, y::Float64)
-        new(x, y, 1)
+    function HomogeneousPoint(cords::NTuple; zone = true)
+        @assert cords[end] != 0
+        zone ? new(cords ./ cords[end]) : new(cords) 
     end
-
-    function HomogeneousPoint(x::Float64, y::Float64, z::Float64; zone=true)
-        @assert z != 0
-        zone ? new(x / z, y / z, 1) : new(x, y, z)
-    end
-
-    function HomogeneousPoint(x::Int, y::Int, z::Int; zone=true)
-        @assert z != 0
-        zone ? new(x / z, y / z, 1) : new(x, y, z)
-    end
-
 end
 
 # conversions between EuclideanPoint and HomogeneousPoint
 # ----------------------------------------------------------
 function EuclideanPoint(Point1::HomogeneousPoint)
-    EuclideanPoint(Point1.x/Point1.z, Point1.y/Point1.z)
+    EuclideanPoint((Point1.cords ./ Point1.cords[end])[1:end-1])
 end
 
 function HomogeneousPoint(Point1::EuclideanPoint; k = 1.0)
-    HomogeneousPoint(Point1.x * k, Point1.y * k, k)
+    HomogeneousPoint(((Point1.cords .* k)..., k))
 end
 # ----------------------------------------------------------
 
 # equality tests between different types of points
 # ----------------------------------------------------------
 function Base.:(==)(Point1::HomogeneousPoint, Point2::HomogeneousPoint)
-    return Point1.x / Point1.z == Point2.x / Point2.z && Point1.y / Point1.z == Point2.y / Point2.z
+    return Point1.cords ./ Point1.cords[end] == Point2.cords ./ Point2.cords[end]
 end
 
 function Base.:(==)(Point1::EuclideanPoint, Point2::EuclideanPoint)
-    return Point1.x == Point2.x && Point1.y == Point2.y
+    return Point1.cords == Point2.cords
 end
 
 function Base.:(==)(Point1::HomogeneousPoint, Point2::EuclideanPoint)
-    return Point1.x / Point1.z == Point2.x && Point1.y / Point1.z == Point2.y
+    return (Point1.cords ./ Point1.cords[end])[1:end-1] == Point2.cords
 end
 
 function Base.:(==)(Point1::EuclideanPoint, Point2::HomogeneousPoint)
-    return Point1.x == Point2.x / Point2.z && Point1.y == Point2.y / Point2.z
+    return (Point2.cords ./ Point2.cords[end])[1:end-1] == Point1.cords
 end
 # ----------------------------------------------------------
