@@ -7,7 +7,8 @@ using Test
         p1 = EuclideanPoint((5.0, 3.0))
         p2 = HomogeneousPoint((5.0, 3.0, 1.0))
         p3 = HomogeneousPoint((10.0, 6.0, 2.0); zone=false)
-    
+        p4 = EuclideanPoint((5.0, 7.0))
+
         # verifies that point always has x, y and their values are correct
         @test p1.cords[1] == 5.0 && p1.cords[2] == 3.0
 
@@ -41,7 +42,53 @@ using Test
         
         @test p2 == HomogeneousPoint(p1)
         @test p3 == HomogeneousPoint(p1)
+
+        # verifies if summation works
+        @test p1 + p4 == EuclideanPoint((10.0, 10.0))
+
+        # verifies if scaling works
+        p5 = EuclideanPoint((4, 2))
+        @test (1.5) * p5 == EuclideanPoint((6.0, 3.0))
+
+        # verifies mid point  computation works
+        @test MidPoint(p1, p5) == EuclideanPoint((4.5, 2.5))
+
+        # verfies if norm calculation works
+        @test EuclideanNorm(p5) == 4.47213595499958
     end 
+
+    @testset "Vector laws Test" begin
+        p1 = EuclideanPoint((1.0,2.0,3.0))
+        p2 = EuclideanPoint((2.0,4.0,6.0))
+        p3 = EuclideanPoint((3.0,5.0,7.0))
+
+        p4 = EuclideanPoint((0,0,0))
+
+        # verifies commutative and abelian
+        @test p1 + p2 == p2 + p1 
+        
+        # verifies scaling
+        @test 2 * p1 == p2
+        
+        # verifies associativity 
+        @test p1 + (p2 + p3) == (p1 + p2) + p3
+        
+        # verifies zero vector 
+        @test p1 + p4 ==  p4 + p1
+
+        # verifies -ve + ve sum
+        @test p1 + (-p1) == EuclideanPoint((0.0,0.0,0.0))
+
+        # verifies multiply by one
+        @test 1 * p1 == p1
+
+        # verifies associativity of multiplication
+        @test 4 * p1 == 2 * (2 * p1)
+
+        # verifies distributivity of multiplication
+        @test 2 * (p1 + p2) == 2 * p1 + 2 * p2
+        @test (2 + 1) * p1 == 2 * p1 + 1 * p1
+    end
 
     @testset "Modelling a cube" begin
         vertices = [] 

@@ -1,5 +1,6 @@
 
 import Base: convert
+import Base: +
 
 abstract type AbstractPoint end
 
@@ -60,8 +61,28 @@ function Base.:(-)(Point1::T, Point2::T) where T <: AbstractPoint
     return typeof(Point1)(Point1.cords .- Point2.cords)
 end
 
-function Base.:(/)(Point1::T, k::Int) where T <: AbstractPoint
+function Base.:(-)(Point1::T) where T <: AbstractPoint
+    return typeof(Point1)((Point1.cords .* -1))
+end
+
+function Base.:(*)(Point1::T, k::N) where {T <: AbstractPoint, N<:Real}
+    return typeof(Point1)((Point1.cords .* k))
+end
+
+function Base.:(*)(k::N, Point1::T) where {T <: AbstractPoint, N<:Real}
+    return typeof(Point1)((Point1.cords .* k))
+end
+
+function Base.:(/)(Point1::T, k::Int) where T <: HomogeneousPoint
     return typeof(Point1)((Point1.cords ./ k)[1:end-1])
+end
+
+function Base.:(/)(Point1::T, k::Int) where T <: EuclideanPoint
+    return typeof(Point1)((Point1.cords ./ k))
+end
+
+function Base.:(+)(f::Function, g::Function) 
+    (x...) -> f(x...) + g(x...)
 end
 # -----------------------------------------------------------
 
@@ -70,4 +91,10 @@ mutable struct Edge{T<:AbstractPoint}
     p2::T
 end
 
+function MidPoint(Point1::T, Point2::T) where T <: EuclideanPoint
+    return (Point1 + Point2)  / 2
+end
 
+function EuclideanNorm(Point1::T) where T <: EuclideanPoint
+    return norm(Point1.cords)
+end

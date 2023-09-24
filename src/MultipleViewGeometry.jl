@@ -7,10 +7,11 @@ using Reexport
 @reexport using StaticArrays
 @reexport using Distances
 @reexport using Combinatorics
+using LinearAlgebra
 
 include("basic_set.jl")
 
 export EuclideanPoint, HomogeneousPoint
-export Edge
+export Edge, EuclideanNorm, MidPoint, Euclidean
 
 end
