@@ -49,3 +49,25 @@ function Base.:(==)(Point1::EuclideanPoint, Point2::HomogeneousPoint)
     return (Point2.cords ./ Point2.cords[end])[1:end-1] == Point1.cords
 end
 # ----------------------------------------------------------
+
+# Operators between points
+# ----------------------------------------------------------
+function Base.:(+)(Point1::T, Point2::T) where T <: AbstractPoint
+    return typeof(Point1)(Point1.cords .+ Point2.cords)
+end
+
+function Base.:(-)(Point1::T, Point2::T) where T <: AbstractPoint
+    return typeof(Point1)(Point1.cords .- Point2.cords)
+end
+
+function Base.:(/)(Point1::T, k::Int) where T <: AbstractPoint
+    return typeof(Point1)((Point1.cords ./ k)[1:end-1])
+end
+# -----------------------------------------------------------
+
+mutable struct Edge{T<:AbstractPoint}
+    p1::T
+    p2::T
+end
+
+
