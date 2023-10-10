@@ -2,15 +2,17 @@ module MultipleViewGeometry
 
 using Reexport
 
-@reexport using CoordinateTransformations
-@reexport using Rotations
-@reexport using StaticArrays
-@reexport using Distances
-@reexport using Combinatorics
+using CoordinateTransformations
+using Rotations
+using StaticArrays
+using Distances
+using Combinatorics
 using LinearAlgebra
 
 include("basic_set.jl")
-include("videoio.jl")
+
+function stereo_setup end
+function show_output end
 
 export EuclideanPoint, HomogeneousPoint
 export Edge, EuclideanNorm, MidPoint, Euclidean
