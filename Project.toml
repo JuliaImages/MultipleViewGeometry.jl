@@ -16,9 +16,11 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 VideoIO = "d6d074c3-1acf-5d4c-9a43-ef38773959a2"
 FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
+GridDetector = "75c2d37c-541b-4fe4-8435-1b4a52ab0cde"
 
 [extensions]
 StereoExt = ["GLMakie", "VideoIO", "FFMPEG"]
+CalibrateExt = ["GridDetector"]
 
 [compat]
 julia = "1"

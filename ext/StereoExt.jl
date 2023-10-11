@@ -41,7 +41,7 @@ function MultipleViewGeometry.show_output(cam2, cam1)
 
         node1[] = rotr90(img1)
         node2[] = rotr90(img2)
-        sleep(0.5 / fps)
+        sleep(0.5/fps)
     end
 end
 

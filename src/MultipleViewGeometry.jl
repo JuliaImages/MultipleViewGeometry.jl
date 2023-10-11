@@ -13,6 +13,7 @@ include("basic_set.jl")
 
 function stereo_setup end
 function show_output end
+function calibrate end
 
 export EuclideanPoint, HomogeneousPoint
 export Edge, EuclideanNorm, MidPoint, Euclidean
@@ -29,5 +30,7 @@ export draw_rect
 
 export stereo_setup
 export show_output
+
+export calibrate
 
 end
