@@ -1,7 +1,11 @@
-using VideoIO, FFMPEG
-using GLMakie
+module StereoExt # Should be same name as the file (just like a normal package)
 
-function stereo_setup()
+using MultipleViewGeometry
+using GLMakie
+using VideoIO
+using FFMPEG
+
+function MultipleViewGeometry.stereo_setup()
     devices = []
 	append!(devices, VideoIO.get_camera_devices(FFMPEG, "dshow", "dummy"))
     cam1 = VideoIO.opencamera("video=" * devices[4])
@@ -9,8 +13,7 @@ function stereo_setup()
     return cam1, cam2
 end
 
-
-function show_output(cam2, cam1)
+function MultipleViewGeometry.show_output(cam2, cam1)
     fig = Figure(size = (1000, 700), title = "Stereo View")
     ax = GLMakie.Axis(
         fig[1, 1],
@@ -38,6 +41,9 @@ function show_output(cam2, cam1)
 
         node1[] = rotr90(img1)
         node2[] = rotr90(img2)
-        sleep(1 / fps)
+        sleep(0.5/fps)
     end
 end
+
+
+end # module
