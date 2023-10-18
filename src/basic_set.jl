@@ -27,6 +27,18 @@ function EuclideanPoint(Point1::HomogeneousPoint)
     EuclideanPoint((Point1.cords ./ Point1.cords[end])[1:end-1])
 end
 
+function EuclideanPoint(Point::CartesianIndex)
+    EuclideanPoint(Tuple(Point))
+end
+
+function EuclideanPoint(Points::Vector{CartesianIndex{N}}) where N
+    points = Vector{EuclideanPoint}([])
+    for i in Points
+        push!(points, EuclideanPoint(i))
+    end
+    return points
+end
+
 function HomogeneousPoint(Point1::EuclideanPoint; k = 1.0)
     HomogeneousPoint(((Point1.cords .* k)..., k))
 end
