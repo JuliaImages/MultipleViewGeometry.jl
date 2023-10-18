@@ -2,15 +2,17 @@ module CalibrateExt
 
 using GridDetector, VideoIO, GLMakie
 using MultipleViewGeometry
+using StatsBase
+using LinearAlgebra
 
-function MultipleViewGeometry.detect_boards(device; save=false, draw=false)
+function MultipleViewGeometry.detect_boards(device::String; save::Bool = false, draw::Bool = false)
     cam = VideoIO.opencamera("video=" * device)
 
     count = 0
     @info count "Calibrating..."
     fps = VideoIO.framerate(cam)
-    images = []
-    corners = []
+    images = Vector{Any}([])
+    corners = Vector{Vector{CartesianIndex{2}}}([])
 
     if (draw == true)
         fig = Figure(size=(1000, 700), title="Stereo View")
@@ -35,6 +37,7 @@ function MultipleViewGeometry.detect_boards(device; save=false, draw=false)
                 res = find_checkerboard(img)
 
                 if (length(res) == 63)
+                    @info count
                     @info "Checkerboard size:" length(res)
                     push!(images, img)
                     push!(corners, res)
@@ -51,10 +54,11 @@ function MultipleViewGeometry.detect_boards(device; save=false, draw=false)
                     sleep(0.01)
                 end
             catch e
-                @info e.message
                 if typeof(e) <: InterruptException
                     println("caught Interrupt")
                     return
+                else 
+                    println(e)
                 end
             end
         end
@@ -74,7 +78,7 @@ function MultipleViewGeometry.detect_boards(device; save=false, draw=false)
 end
 
 
-function get_normalization_matrix(pts, name="A")
+function MultipleViewGeometry.get_normalization_matrix(pts, name="A")
 	pts = Float64.(pts)
 	x_mean, y_mean = mean(pts, dims=1)
 	var_x, var_y = var(pts, dims=1;corrected=false)
@@ -93,15 +97,17 @@ function get_normalization_matrix(pts, name="A")
 	return Float64.(n), Float64.(n_inv)
 end
 	
-function normalize_points(cords)
+function MultipleViewGeometry.normalize_points(cords)
 	views = size(cords)[1]
 
 	ret_correspondences = [] 
     for i in 1:views
-        imp, objp = chessboard_correspondences[i,:]
+        imp = cords[i][1]
+        objp = cords[i][2]
+
         N_x, N_x_inv = get_normalization_matrix(objp, "A")
         N_u, N_u_inv = get_normalization_matrix(imp, "B")
-		val = ones(Float64,(54,1))
+		val = ones(Float64,(4,1))
 		
 		normalized_hom_imp = hcat(imp, val)
         normalized_hom_objp = hcat(objp, val)
@@ -190,7 +196,63 @@ function refine_homographies(H, correspondence; skip=false)
     return H
 end
 
-function get_intrinsic_parameters(H_r)
+function MultipleViewGeometry.compute_view_based_homography(correspondence; reproj = 0)
+    """
+    correspondence = (imp, objp, normalized_imp, normalized_objp, N_u, N_x, N_u_inv, N_x_inv)
+    """
+	# @info correspondence
+    image_points = correspondence[1]
+    object_points = correspondence[2]
+    normalized_image_points = correspondence[3]
+    normalized_object_points = correspondence[4]
+    N_u = correspondence[5]
+    N_x = correspondence[6]
+    N_u_inv = correspondence[7]
+    N_x_inv = correspondence[8]
+
+    N = size(image_points)[1]
+ #    print("Number of points in current view : ", N)
+	# print("\n")
+	
+    M = zeros(Float64, (2*N, 9))
+    # println("Shape of Matrix M : ", size(M))
+
+    # println("N_model\n", N_x)
+    # println("N_observed\n", N_u)
+
+	data = []
+	for i in 1:4
+		world_point, image_point = normalized_object_points[i,:], normalized_image_points[i,:]
+		# @info "points:" world_point image_point
+		u = image_point[1]
+		v = image_point[2]
+		X = world_point[1]
+		Y = world_point[2]
+		res = [-X -Y -1 0 0 0 X*u Y*u u;  0 0 0 -X -Y -1 X*v Y*v v]
+		push!(data, res)
+	end
+	Amat = vcat(data...)
+	# @info Amat
+	u, s, vh = svd(Amat)
+	# @show "Svd:" u s vh
+	min_idx = findmin(s)[2]
+	# @info vh min_idx
+	# @info vh[:,min_idx]
+	h_norm = vh[:,min_idx]
+	# @info h_norm
+	h_norm = reshape(h_norm,(3,3))'
+	# @info h_norm
+	
+	h = (N_u_inv * h_norm) * N_x
+    # @info "h:" N_u_inv h_norm
+ #    # if abs(h[2, 2]) > 10e-8:
+    h = h ./ h[3, 3]
+    # print("Homography for View : \n", h )
+
+    return h
+end
+
+function MultipleViewGeometry.get_intrinsic_parameters(H_r)
     M = length(H_r)
     V = zeros(Float64, (2*M, 6))
 

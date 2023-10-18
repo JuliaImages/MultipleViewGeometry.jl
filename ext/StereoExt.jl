@@ -3,11 +3,10 @@ module StereoExt # Should be same name as the file (just like a normal package)
 using MultipleViewGeometry
 using GLMakie
 using VideoIO
-using FFMPEG
 
 function MultipleViewGeometry.stereo_setup()
     devices = []
-	append!(devices, VideoIO.get_camera_devices(FFMPEG, "dshow", "dummy"))
+	append!(devices, VideoIO.get_camera_devices(1, "dshow", "dummy"))
     cam1 = VideoIO.opencamera("video=" * devices[4])
     cam2 = VideoIO.opencamera("video=" * devices[6])
     return cam1, cam2

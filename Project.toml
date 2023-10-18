@@ -11,16 +11,16 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [weakdeps]
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-VideoIO = "d6d074c3-1acf-5d4c-9a43-ef38773959a2"
-FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 GridDetector = "75c2d37c-541b-4fe4-8435-1b4a52ab0cde"
+VideoIO = "d6d074c3-1acf-5d4c-9a43-ef38773959a2"
 
 [extensions]
-StereoExt = ["GLMakie", "VideoIO", "FFMPEG"]
-CalibrateExt = ["GridDetector"]
+CalibrateExt = ["GridDetector", "GLMakie", "VideoIO"]
+StereoExt = ["GLMakie", "VideoIO"]
 
 [compat]
 julia = "1"
